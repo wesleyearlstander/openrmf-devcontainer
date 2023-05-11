@@ -1,12 +1,15 @@
 ROS and OpenRMF dev container for VSCode
 ----------------------------
+With assistance and inspiration from the ROS dev container repo ![https://github.com/devrt/ros-devcontainer-vscode]
+
 Packed with:
 - Preconfigured docker image for ROS development.
 - Browser accessible X11 server to display gazebo, rviz, rqt (runs on Windows/Mac).
-- Tasks definition to run catkin_make, roscore, rviz commands.
+- Tasks definition to run ros pkg, roscore, rviz commands.
 - Preconfigured code completion for C++, Python, XML (package.xml, launchfiles, URDF, SDF).
 - Preconfigured simulation environments (Flatland, TurtleBot3, ARIAC, Virtual RobotX, UUV).
 - Bonus: WebIDE (Theia) with preconfigured C++, Python, XML completion.
+- OpenRMF packages
 
 VSCode and devcontainer running on Mac:
 ![screenshot](https://user-images.githubusercontent.com/18067/58605055-8dc84980-82d1-11e9-8ee5-dc969fcb2ae1.png)
@@ -40,12 +43,12 @@ We recommend using Theia WebIDE since it has complete VSCode function support af
 
 1. Clone this repository:
 ```shell
-$ git clone https://github.com/devrt/ros-devcontainer-vscode.git
+$ git clone https://github.com/wesleyearlstander/openrmf-devcontainer
 ```
 
 2. Enter the following command under the folder of the cloned project:
 ```shell
-$ cd ros-devcontainer-vscode
+$ cd openrmf-devcontainer
 $ docker-compose up
 ```
 
@@ -109,7 +112,7 @@ $ docker-compose down
 
 If you want to update the environment to the most recent version. Please enter the following commands under the folder of the cloned project:
 ```shell
-$ git pull origin master
+$ git pull origin main
 $ docker-compose pull
 ```
 
