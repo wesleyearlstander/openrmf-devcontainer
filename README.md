@@ -1,6 +1,6 @@
 ROS and OpenRMF dev container for VSCode
 ----------------------------
-With assistance and inspiration from the ROS dev container repo ![ros-devcontainer-vscode](https://github.com/devrt/ros-devcontainer-vscode)
+With assistance and inspiration from the ROS dev container repo [ros-devcontainer-vscode](https://github.com/devrt/ros-devcontainer-vscode)
 
 Packed with:
 - Preconfigured docker image for ROS development.
