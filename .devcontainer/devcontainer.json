@@ -1,10 +1,10 @@
 {
-	"name": "ROS devcontainer for vscode",
+	"name": "ROS and OpenRMF devcontainer for vscode",
 	"dockerComposeFile": [
 		"../docker-compose.yml"
 	],
 	"service": "workspace",
-	"workspaceFolder": "/workspace",
+	"workspaceFolder": "/home/developer/workspaces",
 	"containerEnv": {
 		"ROS_DISTRO": "humble"
 	},

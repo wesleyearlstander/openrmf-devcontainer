@@ -4,9 +4,9 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "catkin_make",
+            "label": "colcon build",
             "type": "shell",
-            "command": "bash -i -c catkin_make",
+            "command": "bash -i -c colcon build",
             "group": {
                 "kind": "build",
                 "isDefault": true
@@ -24,9 +24,14 @@
             }
         },
         {
-            "label": "catkin_create_pkg",
+            "label": "create cpp pkg",
             "type": "shell",
-            "command": "bash -i -c 'cd src && catkin_create_pkg ${input:packageName} ${input:dependingPackages}'"
+            "command": "bash -i -c 'cd workspace/src && ros2 pkg create --build-type ament_cmake --node-name ${input:nodeName} ${input:packageName}'"
+        },
+        {
+            "label": "create py pkg",
+            "type": "shell",
+            "command": "bash -i -c 'cd workspace/src && ros2 pkg create --build-type ament_python --node-name ${input:nodeName} ${input:packageName}'"
         },
         {
             "label": "xserver",
@@ -62,10 +67,9 @@
             "description": "Please enter the name of new package"
         },
         {
-            "id": "dependingPackages",
+            "id": "nodeName",
             "type": "promptString",
-            "description": "Please enter name of depending packages",
-            "default": "roscpp std_msgs"
+            "description": "Please enter name of node"
         }
     ]
 }

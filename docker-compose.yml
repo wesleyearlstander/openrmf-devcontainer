@@ -25,16 +25,19 @@ services:
   workspace:
     # env_file:
     #   - .env
-    image: c8e5b3c8ddb9
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
+    # image: c8e5b3c8ddb9
+    build:
+      context: .
+      dockerfile: Dockerfile
     ipc: host
     security_opt:
     - seccomp:unconfined
     ports:
     - "3001:3000"
     - "3002:8888"
+    volumes:
+    - workspaces:/workspaces
+    - ~/.gitconfig:/home/developer/.gitconfig
     environment:
     - DISPLAY=:0
     - ROS_MASTER_URI=http://simulator:11311/
@@ -44,4 +47,4 @@ services:
     depends_on:
     - xserver
 volumes:
-  workspace:
+  workspaces:

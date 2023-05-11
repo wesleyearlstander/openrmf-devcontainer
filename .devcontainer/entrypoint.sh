@@ -5,18 +5,18 @@ GROUP_ID=$(id -g)
 
 sudo usermod -u $USER_ID -o -m -d /home/developer developer > /dev/null 2>&1
 sudo groupmod -g $GROUP_ID developer > /dev/null 2>&1
-sudo chown -R developer:developer /workspace
+sudo chown -R developer:developer /workspaces
 
-ln -sfn /home/developer/.vscode /workspace/.vscode
+ln -sfn /home/developer/.vscode /workspaces/.vscode
 
-rm -f /workspace/compile_flags.txt || true
-sed -e 's@\$ROS_DISTRO@'"$ROS_DISTRO"'@' /home/developer/compile_flags.txt > /workspace/compile_flags.txt
+rm -f /workspaces/compile_flags.txt || true
+sed -e 's@\$ROS_DISTRO@'"$ROS_DISTRO"'@' /home/developer/compile_flags.txt > /workspaces/compile_flags.txt
 
-ln -sfn /workspace /home/developer/workspace
+ln -sfn /workspaces /home/developer/workspaces
 
 source /opt/ros/$ROS_DISTRO/setup.bash
 
-mkdir -p /workspace/src && cd /workspace/src && catkin_init_workspace || true
+mkdir -p /workspaces/workspace/src
 
 cd /home/developer
 

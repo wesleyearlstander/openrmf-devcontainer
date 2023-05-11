@@ -1,4 +1,4 @@
-ROS dev container for VSCode
+ROS and OpenRMF dev container for VSCode
 ----------------------------
 Packed with:
 - Preconfigured docker image for ROS development.

@@ -72,14 +72,17 @@ RUN sh -c 'echo "deb https://deb.nodesource.com/node_16.x `lsb_release -cs` main
 
 # install depending packages
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get install -y bash-completion less wget vim-tiny iputils-ping net-tools openssh-client git openjdk-8-jdk-headless nodejs sudo imagemagick byzanz python3-dev build-essential libsecret-1-dev && \
+    apt-get install -y bash-completion less wget vim-tiny iputils-ping net-tools openssh-client cmake python3-vcstool openjdk-8-jdk-headless nodejs sudo imagemagick byzanz python3-dev build-essential libsecret-1-dev && \
     npm install -g yarn && \
     apt-get clean
 
 # basic python packages
 RUN apt-get install -y python-is-python3; \
     curl -kL https://bootstrap.pypa.io/get-pip.py | python; \
-    pip install --upgrade --ignore-installed --no-cache-dir pyassimp pylint==1.9.4 autopep8 python-language-server[all] notebook~=5.7 Pygments matplotlib ipywidgets jupyter_contrib_nbextensions nbimporter supervisor supervisor_twiddler argcomplete
+    pip install --upgrade --ignore-installed --no-cache-dir pyassimp pylint==1.9.4 autopep8 python-language-server[all] notebook~=5.7 Pygments matplotlib ipywidgets jupyter_contrib_nbextensions nbimporter supervisor supervisor_twiddler argcomplete flask-socketio fastapi uvicorn datamodel_code_generator
+
+# Packages for OpenRMF
+RUN apt-get install -y python3-colcon* python3-rosdep
 
 # jupyter extensions
 RUN jupyter nbextension enable --py widgetsnbextension && \
@@ -101,17 +104,39 @@ COPY .devcontainer/supervisord.conf /etc/supervisor/supervisord.conf
 COPY .devcontainer/theia.conf /etc/supervisor/conf.d/theia.conf
 COPY .devcontainer/jupyter.conf /etc/supervisor/conf.d/jupyter.conf
 
-COPY .devcontainer/entrypoint.sh /entrypoint.sh
-
 COPY .devcontainer/sim.py /usr/bin/sim
 
 COPY --from=xsdcache /opt/xsd /opt/xsd
 
 USER developer
 WORKDIR /home/developer
-
 ENV HOME /home/developer
 ENV SHELL /bin/bash
+
+# init rosdep
+RUN sudo rosdep init
+RUN rosdep update
+
+# Add rmf repos
+RUN mkdir -p ~/workspaces/rmf_ws/src
+RUN wget https://raw.githubusercontent.com/open-rmf/rmf/main/rmf.repos
+RUN vcs import ~/workspaces/rmf_ws/src < rmf.repos
+RUN rosdep install --from-paths ~/workspaces/rmf_ws/src --ignore-src --rosdistro ${ROS_DISTRO} -y
+
+# Compile RMF from source to always have latest version
+RUN sudo apt update && \
+    sudo apt install -y clang clang-tools lldb lld libstdc++-12-dev
+
+RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
+    colcon mixin update default
+
+# Compile workspace
+RUN source /opt/ros/humble/setup.bash
+
+RUN export CXX=clang++
+RUN export CC=clang
+# RUN cd ~/rmf_ws
+# RUN colcon build --mixin release lld
 
 # jre is required to use XML editor extension
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -135,15 +160,11 @@ RUN git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && \
 RUN git clone --depth 1 https://github.com/b4b4r07/enhancd.git ~/.enhancd && \
     echo "source ~/.enhancd/init.sh" >> ~/.bashrc
 
-# init rosdep
-RUN sudo rosdep init
-RUN rosdep update
-
 # global vscode config
 ADD .vscode /home/developer/.vscode
 ADD .vscode /home/developer/.theia
 ADD .devcontainer/compile_flags.txt /home/developer/compile_flags.txt
-ADD .devcontainer/templates /home/developer/templates
+ADD .devcontainer/templates /home/developer/workspaces/templates
 RUN sudo chown -R developer:developer /home/developer
 
 # install theia web IDE
@@ -167,6 +188,11 @@ RUN jupyter nbextension enable hinterland/hinterland && \
 RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 
 EXPOSE 3000 8888
+
+COPY .devcontainer/entrypoint.sh /entrypoint.sh
+
+RUN sudo apt-get install -y dos2unix
+RUN sudo dos2unix /entrypoint.sh
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "sudo", "-E", "/usr/local/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]
