@@ -117,16 +117,10 @@ ENV SHELL /bin/bash
 RUN sudo rosdep init
 RUN rosdep update
 
-# Add rmf repos
-RUN mkdir -p ~/workspaces/rmf_ws/src
-RUN wget https://raw.githubusercontent.com/open-rmf/rmf/main/rmf.repos
-RUN vcs import ~/workspaces/rmf_ws/src < rmf.repos
-RUN rosdep install --from-paths ~/workspaces/rmf_ws/src --ignore-src --rosdistro ${ROS_DISTRO} -y
-
-# Compile RMF from source to always have latest version
+# Add compilation libraries
 RUN sudo apt update && \
     sudo apt install -y clang clang-tools lldb lld libstdc++-12-dev
-
+    
 RUN colcon mixin add default https://raw.githubusercontent.com/colcon/colcon-mixin-repository/master/index.yaml && \
     colcon mixin update default
 
@@ -135,8 +129,9 @@ RUN source /opt/ros/humble/setup.bash
 
 RUN export CXX=clang++
 RUN export CC=clang
-# RUN cd ~/rmf_ws
-# RUN colcon build --mixin release lld
+
+# Install RMF packages
+RUN sudo apt install -y ros-humble-rmf*
 
 # jre is required to use XML editor extension
 ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64
@@ -164,7 +159,7 @@ RUN git clone --depth 1 https://github.com/b4b4r07/enhancd.git ~/.enhancd && \
 ADD .vscode /home/developer/.vscode
 ADD .vscode /home/developer/.theia
 ADD .devcontainer/compile_flags.txt /home/developer/compile_flags.txt
-ADD .devcontainer/templates /home/developer/workspaces/templates
+ADD .devcontainer/templates /home/developer/workspace/templates
 RUN sudo chown -R developer:developer /home/developer
 
 # install theia web IDE
@@ -189,10 +184,22 @@ RUN echo "source /opt/ros/$ROS_DISTRO/setup.bash" >> ~/.bashrc
 
 EXPOSE 3000 8888
 
+RUN sudo apt-get install -y dos2unix
+
 COPY .devcontainer/entrypoint.sh /entrypoint.sh
 
-RUN sudo apt-get install -y dos2unix
 RUN sudo dos2unix /entrypoint.sh
+
+RUN sudo chown -R developer:developer /home/developer/workspace
+
+RUN ln -sfn /home/developer/.vscode /home/developer/workspace/.vscode
+
+RUN rm -f /workspaces/compile_flags.txt || true
+RUN sed -e 's@\$ROS_DISTRO@'"$ROS_DISTRO"'@' /home/developer/compile_flags.txt > /home/developer/workspace/compile_flags.txt
+
+RUN source /opt/ros/${ROS_DISTRO}/setup.bash
+
+RUN mkdir -p /home/developer/workspace/src
 
 ENTRYPOINT [ "/entrypoint.sh" ]
 CMD [ "sudo", "-E", "/usr/local/bin/supervisord", "-c", "/etc/supervisor/supervisord.conf"]

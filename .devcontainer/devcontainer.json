@@ -4,7 +4,7 @@
 		"../docker-compose.yml"
 	],
 	"service": "workspace",
-	"workspaceFolder": "/home/developer/workspaces",
+	"workspaceFolder": "/home/developer/workspace",
 	"containerEnv": {
 		"ROS_DISTRO": "humble"
 	},
